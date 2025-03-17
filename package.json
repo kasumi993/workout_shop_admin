@@ -1,0 +1,31 @@
+{
+  "name": "workout_shop_admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@auth/mongodb-adapter": "^3.8.0",
+    "axios": "^1.8.3",
+    "mongodb": "^6.14.2",
+    "mongoose": "^8.12.1",
+    "next": "15.2.2",
+    "next-auth": "^4.24.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-sortablejs": "^6.1.4",
+    "react-spinners": "^0.15.0",
+    "sass": "^1.85.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.2",
+    "tailwindcss": "^4"
+  }
+}
