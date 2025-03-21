@@ -10,7 +10,7 @@ export default async function handler(req, res) {
         }
         res.json(await Product.find());
     }
-    
+
     if (method === 'POST') {
         const { title, description, price } = req.body;
         const productDocument = await Product.create({ 
@@ -20,5 +20,24 @@ export default async function handler(req, res) {
         });
 
         res.json(productDocument);
+    }
+
+    if (method === 'PUT') {
+        const { title, description, price, _id } = req.body;
+        const productDocument = await Product.updateOne({ _id }, { 
+            title, 
+            description, 
+            price: parseInt(price, 10)
+        });
+
+        res.json(productDocument);
+    }
+
+    if (method === 'DELETE') {
+        if (req.query?.id) {
+            const productDocument = await Product.deleteOne({ _id: req.query.id });
+            res.json(productDocument);
+        }
+        
     }
 }

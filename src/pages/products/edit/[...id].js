@@ -18,7 +18,7 @@ export default function EditProductPage() {
                 setProductInfo(response.data);
             })
         }
-    })
+    }, [id]);
 
     return (
         <MainLayout>
