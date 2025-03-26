@@ -1,17 +1,17 @@
 import MainLayout from "@/layouts/MainLayout";
 import {useEffect, useState} from "react";
 import axios from "axios";
-import { withSwal } from 'react-sweetalert2';
+import Swal from 'sweetalert2';
 
-function Categories({swal}) {
+export default function Categories() {
   const [editedCategory, setEditedCategory] = useState(null);
   const [name,setName] = useState('');
   const [parentCategory,setParentCategory] = useState('');
   const [categories,setCategories] = useState([]);
   const [properties,setProperties] = useState([]);
-  // useEffect(() => {
-  //   fetchCategories();
-  // }, [])
+  useEffect(() => {
+    fetchCategories();
+  }, [])
   function fetchCategories() {
     axios.get('/api/categories').then(result => {
       setCategories(result.data);
@@ -51,7 +51,7 @@ function Categories({swal}) {
     );
   }
   function deleteCategory(category){
-    swal.fire({
+    Swal.fire({
       title: 'Are you sure?',
       text: `Do you want to delete ${category.name}?`,
       showCancelButton: true,
@@ -201,7 +201,3 @@ function Categories({swal}) {
     </MainLayout>
   );
 }
-
-export default withSwal(({swal}, ref) => (
-  <Categories swal={swal} />
-));
