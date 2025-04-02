@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-img{
+img {
     max-height: 100%;
 }
 input, textarea, select {
@@ -12,7 +12,8 @@ input, textarea, select {
   }
   
   input:focus, textarea:focus, select:focus {
-    border-color: #1e3a8a;
+    border-color: #4f7bc3;
+    outline: #4f7bc3;
   }
   
   h1 {

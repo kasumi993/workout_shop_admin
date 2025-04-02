@@ -6,9 +6,9 @@ import Logo from "@/components/GlobalComponents/Logo";
 
 export default function Sidebar({show}) {
   const inactiveLink = 'flex gap-1 p-1';
-  const activeLink = inactiveLink+' bg-highlight text-black rounded-sm';
+  const activeLink = inactiveLink+' bg-[#eae8fb] text-black rounded-sm';
   const inactiveIcon = 'w-6 h-6';
-  const activeIcon = inactiveIcon + ' text-primary';
+  const activeIcon = inactiveIcon + ' text-[#5542F6]';
   const router = useRouter();
   const {pathname} = router;
   async function logout() {
@@ -43,7 +43,7 @@ export default function Sidebar({show}) {
     },
   ];
   return (
-    <aside className={(show?'left-0':'-left-full')+" top-0 text-gray-500 p-4 fixed w-full bg-bgGray h-full md:static md:w-auto transition-all"}>
+    <aside className={(show?'left-0':'-left-full')+" top-0 text-gray-500 p-4 fixed w-full bg-[#fbfafd] h-full md:static md:w-auto transition-all"}>
       <div className="mb-4 mr-4">
         <Logo />
       </div>
