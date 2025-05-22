@@ -2,6 +2,7 @@ import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import axios from 'axios';
+import api from '/lib/api';
 
 // Configure the API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -11,7 +12,14 @@ export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_ID,
-      clientSecret: process.env.GOOGLE_SECRET
+      clientSecret: process.env.GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code"
+        }
+      }
     }),
     CredentialsProvider({
       name: 'Credentials',
@@ -22,7 +30,7 @@ export const authOptions = {
       async authorize(credentials) {
         try {
           // Make a call to the NestJS backend for authentication
-          const response = await axios.post(`${API_URL}/auth/login`, {
+          const response = await api.post(`${API_URL}/auth/login`, {
             email: credentials.email,
             password: credentials.password
           });
@@ -50,12 +58,40 @@ export const authOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, profile }) {
       // Initial sign in
-      if (user) {
-        token.accessToken = user.accessToken;
-        token.isAdmin = user.isAdmin;
-        token.id = user.id;
+      if (account && user) {
+        // For Google sign-in, verify with backend
+        if (account.provider === 'google') {
+          try {
+            const response = await api.post(`${API_URL}/auth/google`, {
+              email: profile.email,
+              name: profile.name,
+              image: profile.picture,
+              googleId: profile.sub
+            });
+            
+            const { user: backendUser, access_token } = response.data;
+            
+            if (backendUser && backendUser.isAdmin) {
+              token.accessToken = access_token;
+              token.isAdmin = backendUser.isAdmin;
+              token.id = backendUser.id;
+              return token;
+            } else {
+              // User exists but is not admin
+              return null;
+            }
+          } catch (error) {
+            console.error('Google auth error:', error);
+            return null;
+          }
+        } else {
+          // For credentials provider
+          token.accessToken = user.accessToken;
+          token.isAdmin = user.isAdmin;
+          token.id = user.id;
+        }
       }
       return token;
     },
@@ -67,9 +103,9 @@ export const authOptions = {
       return session;
     },
     async signIn({ user, account, profile }) {
-      // For Google authentication, verify if user is an admin
+      // For Google authentication, the verification is done in jwt callback
       if (account.provider === 'google') {
-        return user.isAdmin;
+        return true; // Allow sign in, actual verification happens in jwt callback
       }
       
       // For credentials, the authorization logic is already handled
@@ -87,16 +123,3 @@ export const authOptions = {
 };
 
 export default NextAuth(authOptions);
-
-// Helper function to be used in API routes to verify admin status
-export async function isAdminRequest(req, res) {
-  const session = await getServerSession(req, res, authOptions);
-  console.log('Session:', session);
-  
-  if (!session?.user?.isAdmin) {
-    res.status(401).json({ message: 'Unauthorized - Admin access required' });
-    return false;
-  }
-  
-  return true;
-}
