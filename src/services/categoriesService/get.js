@@ -1,16 +1,11 @@
-import api from '/lib/api';
-import { API_URL } from '../../config';
+import api from '@/lib/api';
 
 /**
  * Fetches categories from the backend
- * 
- * @param {Object} options - Request options
- * @param {Object} options.params - URL parameters
- * @returns {Promise<Array>} - Promise with the categories data
  */
-export const getCategories = async (options = {}) => {
+export const getCategories = async () => {
     try {
-        const response = await api.get(`${API_URL}/categories`, options);
+        const response = await api.get(`/categories`);
         return response.data;
     } catch (error) {
         console.error('Error fetching categories:', error);
@@ -26,7 +21,7 @@ export const getCategories = async (options = {}) => {
  */
 export const getCategoryById = async (id) => {
     try {
-        const response = await api.get(`${API_URL}/categories/${id}`);
+        const response = await api.get(`/categories/${id}`);
         return response.data;
     } catch (error) {
         console.error(`Error fetching category with ID ${id}:`, error);

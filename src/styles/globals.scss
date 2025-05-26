@@ -1,17 +1,18 @@
 @import "tailwindcss";
+@plugin 'tailwind-scrollbar';
 
 img {
     max-height: 100%;
 }
-input, textarea, select {
+input, textarea, select, .styled-select {
     border: 1px solid #e5e7eb;
-    border-radius: 0.125rem;
+    border-radius: 0.25rem;
     padding: 0.5rem 0.75rem;
     width: 100%;
     margin-bottom: 0.5rem;
   }
   
-  input:focus, textarea:focus, select:focus {
+  input:focus, input:hover, textarea:focus, textarea:hover, select:focus, select:hover, .styled-select:focus, .styled-select:hover {
     border-color: #4f7bc3;
     outline: #4f7bc3;
   }
@@ -23,9 +24,9 @@ input, textarea, select {
     line-height: 1.75rem;
   }
   
-  label {
+  label, .styled-select-label {
     color: #4b5563;
-    font-size: 0.875rem;
+    font-size: 1rem;
     line-height: 1.25rem;
   }
   

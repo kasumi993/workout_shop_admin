@@ -1,4 +1,3 @@
-// src/lib/api.js
 import axios from 'axios';
 import { getSession } from 'next-auth/react';
 

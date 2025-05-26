@@ -1,11 +1,10 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import api from '/lib/api';
+import axios from 'axios';
 
 // Configure the API URL
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 
 export const authOptions = {
   providers: [
@@ -29,7 +28,7 @@ export const authOptions = {
       async authorize(credentials) {
         try {
           // Make a call to the NestJS backend for authentication
-          const response = await api.post(`${API_URL}/auth/login`, {
+          const response = await axios.post(`${API_URL}/auth/login`, {
             email: credentials.email,
             password: credentials.password
           });
@@ -63,7 +62,7 @@ export const authOptions = {
         // For Google sign-in, verify with backend
         if (account.provider === 'google') {
           try {
-            const response = await api.post(`${API_URL}/auth/google`, {
+            const response = await axios.post(`${API_URL}/auth/google`, {
               email: profile.email,
               name: profile.name,
               image: profile.picture,
@@ -76,6 +75,9 @@ export const authOptions = {
               token.accessToken = access_token;
               token.isAdmin = backendUser.isAdmin;
               token.id = backendUser.id;
+              token.email = backendUser.email;
+              token.name = backendUser.name;
+              token.image = backendUser.image;
               return token;
             } else {
               // User exists but is not admin
@@ -90,15 +92,25 @@ export const authOptions = {
           token.accessToken = user.accessToken;
           token.isAdmin = user.isAdmin;
           token.id = user.id;
+          token.email = user.email;
+          token.name = user.name;
+          token.image = user.image;
         }
       }
+      
+      // Return existing token if no new sign in
       return token;
     },
     async session({ session, token }) {
       // Send properties to the client
-      session.accessToken = token.accessToken;
-      session.user.isAdmin = token.isAdmin;
-      session.user.id = token.id;
+      if (token) {
+        session.accessToken = token.accessToken;
+        session.user.isAdmin = token.isAdmin;
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.image = token.image;
+      }
       return session;
     },
     async signIn({ user, account, profile }) {

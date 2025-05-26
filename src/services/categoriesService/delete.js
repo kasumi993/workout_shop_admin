@@ -1,5 +1,4 @@
-import api from '/lib/api';
-import { API_BASE_URL } from '../../config';
+import api from '@/lib/api';
 
 /**
  * Deletes a category by its ID
@@ -13,7 +12,7 @@ export const deleteCategory = async (categoryId) => {
             throw new Error('Category ID is required');
         }
 
-        const response = await api.delete(`${API_BASE_URL}/categories/${categoryId}`);
+        const response = await api.delete(`/categories/${categoryId}`);
         
         return response.data;
     } catch (error) {

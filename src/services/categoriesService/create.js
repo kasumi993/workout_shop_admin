@@ -1,14 +1,11 @@
-import api from '/lib/api';
-import { API_URL } from '../../config';
+import api from '@/lib/api';
 
 /**
  * Creates a new category
  */
 const createCategory = async (categoryData) => {
     try {
-        const response = await api.post(
-            `${API_URL}/categories`, categoryData,
-        );
+        const response = await api.post('/categories', categoryData);
         
         return response.data;
     } catch (error) {

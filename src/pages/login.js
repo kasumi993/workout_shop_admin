@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import Logo from "@/components/GlobalComponents/Logo";
+import LoadingSpinner from "@/components/GlobalComponents/LoadingSpinner";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,8 @@ export default function LoginPage() {
   
   // If already authenticated, redirect to dashboard
   useEffect(() => {
+    console.log('Session:', session);
+    console.log('Status:', status);
     if (status === 'authenticated' && session?.user?.isAdmin) {
       router.push('/');
     }
@@ -49,9 +52,7 @@ export default function LoginPage() {
   
   if (status === 'loading') {
     return (
-      <div className="bg-[#fbfafd] min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-      </div>
+      <LoadingSpinner />
     );
   }
   

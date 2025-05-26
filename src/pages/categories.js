@@ -1,33 +1,36 @@
 import MainLayout from "@/layouts/MainLayout";
-import {useEffect, useState} from "react";
-import axios from "axios";
+import { useEffect, useState } from "react";
+import CategoriesService from "@/services/categoriesService";
 import CategoriesList from "@/components/Categories/CategoriesList";
 import EditCategory from "@/components/Categories/EditCategory";
 
 export default function Categories() {
   const [editedCategory, setEditedCategory] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  function fetchCategories() {
-    axios.get('/api/categories').then(result => {
-      setCategories(result.data);
-    });
+  async function fetchCategories() {
+    try {
+      const response = await CategoriesService.getCategories();
+      setCategories(response);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
   }
 
   function onEditCategories() {
     fetchCategories();
+    setRefresh(prev => prev + 1); // Trigger refresh in CategoriesList
     setEditedCategory(null);
   }
 
-
-  function editCategory(category){
+  function editCategory(category) {
     setEditedCategory(category);
   }
-
 
   return (
     <MainLayout>
@@ -37,10 +40,16 @@ export default function Categories() {
           ? `Edit category ${editedCategory.name}`
           : 'Create new category'}
       </label>
-      <EditCategory categories={categories} editedCategory={editedCategory} onEditCategories={onEditCategories}  />
+      <EditCategory 
+        categories={categories} 
+        editedCategory={editedCategory} 
+        setEditedCategory={setEditedCategory}
+        onEditCategories={onEditCategories}  
+      />
       {!editedCategory && (
         <CategoriesList
           onEditCategory={editCategory}
+          refresh={refresh}
         />
       )}
     </MainLayout>

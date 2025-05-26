@@ -1,48 +1,41 @@
+import LoadingSpinner from "@/components/GlobalComponents/LoadingSpinner";
 import { ToastProvider } from "@/components/GlobalComponents/Notifications";
+import Unauthorized from "@/components/GlobalComponents/Unauthorized";
 import "@/styles/globals.scss";
 import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
-// Wrapper component to protect routes
+import { useEffect } from "react";
+
 function Auth({ children }) {
   const router = useRouter();
   const { data: session, status } = useSession();
-  
-  // List of public routes that don't require authentication
-  const publicRoutes = ['/login'];
+
+  const publicRoutes = ['/login', '/debug'];
   const requiresAuth = !publicRoutes.includes(router.pathname);
-  
-  // If authentication is still loading
+
+  useEffect(() => {
+    console.log('Auth effect triggered:', { status, requiresAuth, session });
+    if (status === 'unauthenticated' && requiresAuth) {
+      router.push('/login');
+    }
+  }, [status, requiresAuth, router]);
+
   if (status === 'loading') {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5542F6]"></div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
-  
-  // If the route requires auth and the user is not logged in
-  if (requiresAuth && !session) {
-    router.push('/login');
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5542F6]"></div>
-      </div>
-    );
+
+  if (requiresAuth && status === 'unauthenticated') {
+    return <LoadingSpinner />;
   }
-  
-  // If the route requires auth and the user is not an admin
+
   if (requiresAuth && session && !session.user.isAdmin) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold">Unauthorized - Admin access required</h1>
-      </div>
-    );
+    return <Unauthorized />;
   }
-  
-  // If the user is authenticated or the route is public
+
   return children;
 }
+
 
 export default function App({ Component, pageProps: { session, ...pageProps } }) {
   return (
@@ -54,4 +47,15 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
       </Auth>
     </SessionProvider>
   );
+}
+
+
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
+
+  return {
+    props: {
+      session,
+    },
+  };
 }

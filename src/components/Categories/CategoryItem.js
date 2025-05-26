@@ -7,7 +7,7 @@ export default function CategoryItem({ category, onEditCategory, onDeleteCategor
         onDeleteCategory(category);
     }
     return (
-        <tr key={category._id}>
+        <tr key={category.id}>
             <td>{category.name}</td>
             <td>{category?.parent?.name}</td>
             <td>
