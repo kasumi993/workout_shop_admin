@@ -3,7 +3,7 @@ import { HiPlus } from 'react-icons/hi2';
 import PropertyCard from './PropertyCard';
 
 export default function ProductVariants({ 
-  categories, 
+//   categories, 
   categoryId, 
   initialProperties = {},
   onPropertiesChange,
@@ -12,85 +12,101 @@ export default function ProductVariants({
   const [properties, setProperties] = useState([]);
   const [editingProperty, setEditingProperty] = useState(null);
   const [editingValue, setEditingValue] = useState('');
-
   const [isInitialized, setIsInitialized] = useState(false);
+//   const [initialCategoryId, setInitialCategoryId] = useState(null);
+//   const [hasUserSelectedCategory, setHasUserSelectedCategory] = useState(false);
 
-  // Get suggested properties from category hierarchy
-  const getSuggestedProperties = useCallback(() => {
-    if (!categories.length || !categoryId) return [];
+//   // Get suggested properties from category hierarchy
+//   const getSuggestedProperties = useCallback(() => {
+//     if (!categories.length || !categoryId) return [];
     
-    const suggestions = [];
-    let currentCat = categories.find(cat => cat.id === categoryId);
+//     const suggestions = [];
+//     let currentCat = categories.find(cat => cat.id === categoryId);
     
-    while (currentCat) {
-      if (currentCat.properties?.length) {
-        suggestions.unshift(...currentCat.properties);
-      }
-      const parentId = currentCat.parent?.id || currentCat.parent;
-      currentCat = parentId ? categories.find(cat => cat.id === parentId) : null;
-    }
+//     while (currentCat) {
+//       if (currentCat.properties?.length) {
+//         suggestions.unshift(...currentCat.properties);
+//       }
+//       const parentId = currentCat.parent?.id || currentCat.parent;
+//       currentCat = parentId ? categories.find(cat => cat.id === parentId) : null;
+//     }
     
-    return suggestions.filter((prop, index, arr) => 
-      arr.findIndex(p => p.name === prop.name) === index
-    );
-  }, [categories, categoryId]);
+//     return suggestions.filter((prop, index, arr) => 
+//       arr.findIndex(p => p.name === prop.name) === index
+//     );
+//   }, [categories, categoryId]);
 
-  // Initialize properties from category suggestions and existing data
+//   // Store the initial category ID to detect user changes
+//   useEffect(() => {
+//     if (!isInitialized && categoryId) {
+//       setInitialCategoryId(categoryId);
+//     }
+//   }, [categoryId, isInitialized]);
+
+  // Initialize properties ONLY from existing data (not category suggestions)
   useEffect(() => {
     if (isInitialized) return;
     
-    const suggestions = getSuggestedProperties();
+    // Only initialize from existing properties, don't add category suggestions
     const existingProps = Object.keys(initialProperties || {}).map(key => ({
       id: Math.random().toString(36).substr(2, 9),
       name: key,
       values: Array.isArray(initialProperties[key]) ? initialProperties[key] : [initialProperties[key]].filter(Boolean),
-      isFromCategory: suggestions.some(s => s.name === key),
+      isFromCategory: false, // We'll update this flag only when user actively selects category
       isRequired: false
     }));
 
-    // Add category suggestions that aren't already in existing props
-    const suggestedProps = suggestions
-      .filter(suggestion => !existingProps.some(prop => prop.name === suggestion.name))
-      .map(suggestion => ({
-        id: Math.random().toString(36).substr(2, 9),
-        name: suggestion.name,
-        values: Array.isArray(suggestion.values) ? suggestion.values : suggestion.values?.split(',').map(v => v.trim()) || [],
-        isFromCategory: true,
-        isRequired: false
-      }));
-
-    setProperties([...existingProps, ...suggestedProps]);
+    setProperties(existingProps);
     setIsInitialized(true);
-  }, [categoryId, getSuggestedProperties, initialProperties, isInitialized]);
+  }, [initialProperties, isInitialized]);
 
-  // Update suggestions when category changes (but keep existing custom properties)
-  useEffect(() => {
-    if (!isInitialized) return;
+//   // Detect when user actively changes category (not initial load)
+//   useEffect(() => {
+//     if (!isInitialized) return;
     
-    const suggestions = getSuggestedProperties();
+//     // If category changed from the initial one, mark as user-selected
+//     if (categoryId !== initialCategoryId) {
+//       setHasUserSelectedCategory(true);
+//     }
+//   }, [categoryId, initialCategoryId, isInitialized]);
+
+//   // Add category suggestions ONLY when user actively selects a category
+//   useEffect(() => {
+//     if (!isInitialized || !categoryId || !hasUserSelectedCategory) return;
+
+//     // If no category is selected or categories changed, remove all category-suggested properties before affecting new suggestions
+//     setProperties(prevProperties => 
+//         prevProperties.map(prop => ({
+//           ...prop,
+//           isFromCategory: false // Remove the category flag
+//         })).filter(prop => !prop.isFromCategory)
+//       );
     
-    setProperties(prevProperties => {
-      // Keep existing properties and add new suggestions
-      const existingNames = new Set(prevProperties.map(p => p.name));
-      const newSuggestions = suggestions
-        .filter(suggestion => !existingNames.has(suggestion.name))
-        .map(suggestion => ({
-          id: Math.random().toString(36).substr(2, 9),
-          name: suggestion.name,
-          values: Array.isArray(suggestion.values) ? suggestion.values : suggestion.values?.split(',').map(v => v.trim()) || [],
-          isFromCategory: true,
-          isRequired: false
-        }));
+//     // const suggestions = getSuggestedProperties();
+    
+//     setProperties(prevProperties => {
+//       // Update isFromCategory flag for existing properties based on current category
+//       const updatedProperties = prevProperties.map(prop => ({
+//         ...prop,
+//         isFromCategory: suggestions.some(s => s.name === prop.name)
+//       }));
       
-      // Update isFromCategory flag for existing properties
-      const updatedProperties = prevProperties.map(prop => ({
-        ...prop,
-        isFromCategory: suggestions.some(s => s.name === prop.name)
-      }));
+//       // Add new suggestions that don't already exist
+//       const existingNames = new Set(updatedProperties.map(p => p.name));
+//       const newSuggestions = suggestions
+//         .filter(suggestion => !existingNames.has(suggestion.name))
+//         .map(suggestion => ({
+//           id: Math.random().toString(36).substr(2, 9),
+//           name: suggestion.name,
+//           values: Array.isArray(suggestion.values) ? suggestion.values : suggestion.values?.split(',').map(v => v.trim()) || [],
+//           isFromCategory: true,
+//           isRequired: false
+//         }));
       
-      return [...updatedProperties, ...newSuggestions];
-    });
-  }, [categoryId, getSuggestedProperties, isInitialized]);
+//       return [...updatedProperties, ...newSuggestions];
+//     });
+//   }, [categoryId, getSuggestedProperties, isInitialized, hasUserSelectedCategory]);
+
 
   // Notify parent component of changes (with debouncing to prevent excessive calls)
   useEffect(() => {
