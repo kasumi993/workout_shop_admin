@@ -3,14 +3,18 @@ import api from '@/lib/api';
 /**
  * File delete service
  */
-const deleteFile = async (fileUrl) => {
+const deleteFile = (fileUrl) => new Promise((res, rej) => {
     const data = { fileUrl }
-    try {
-        await api.delete(`/upload`, { data });
-    } catch (error) {
-        console.error('Error deleting files:', error);
-        throw error;
-    }
-}
+
+    api.delete(`/upload`, { data })
+    .then((response) => {
+        res(response.data);
+
+    })
+    .catch((error) => {
+        console.error('Error deleting file:', error);
+        rej(error);
+    });
+})
 
 export default deleteFile;

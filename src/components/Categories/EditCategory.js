@@ -33,7 +33,7 @@ export default function EditCategory({
         try {
             const data = {
                 name,
-                parentCategory: parentCategory || null,
+                parentId: parentCategory || null,
                 properties: properties.map(p => ({
                     name: p.name,
                     values: typeof p.values === 'string' ? p.values.split(',').map(v => v.trim()) : p.values,

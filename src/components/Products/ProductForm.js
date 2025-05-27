@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import Spinner from "@/components/GlobalComponents/BouncingSpinner";
+import Spinner from "@/components/GlobalComponents/LoadingSpinner";
 import SelectTwoLists from "@/components/DesignSystem/SelectTwoLists";
 import ImageUploader from "@/components/Images/ImageUploader";
 import BasicFields from "@/components/InputFields/BasicFields";

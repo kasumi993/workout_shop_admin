@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import ProductsService from "@/services/productsService";
 import { useToast } from "@/components/GlobalComponents/Notifications";
-import Spinner from "@/components/GlobalComponents/BouncingSpinner";
+import Spinner from "@/components/GlobalComponents/LoadingSpinner";
 
 export default function DeleteProductPage() {
     const router = useRouter();

@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import ProductForm from '@/components/Products/ProductForm';
 import ProductsService from '@/services/productsService';
-import Spinner from '@/components/GlobalComponents/BouncingSpinner';
+import Spinner from '@/components/GlobalComponents/LoadingSpinner';
 import { useToast } from '@/components/GlobalComponents/Notifications';
 
 export default function EditProductPage() {
