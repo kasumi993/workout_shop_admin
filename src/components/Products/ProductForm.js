@@ -1,10 +1,9 @@
 import { useState, useCallback } from "react";
 import Spinner from "@/components/GlobalComponents/BouncingSpinner";
 import SelectTwoLists from "@/components/DesignSystem/SelectTwoLists";
-import AddProperties from "@/components/Properties/AddProperties";
 import ImageUploader from "@/components/Images/ImageUploader";
 import BasicFields from "@/components/InputFields/BasicFields";
-import CategoryProperties from "@/components/Properties/CategoryProperties";
+import ProductVariants from "@/components/Properties/ProductVariants";
 import { useCategories } from "@/hooks/useCategories";
 import { useProductForm } from "@/hooks/useProductForm";
 
@@ -44,25 +43,12 @@ export default function ProductForm({
 
   const handleCategoryChange = useCallback((value) => {
     setCategoryId(value);
-    // Clear properties when category changes
-    setProductProperties({});
+    // Note: We don't clear properties when category changes anymore
+    // The variants component will handle suggesting new properties
   }, []);
 
-  const setProductProp = useCallback((propName, value) => {
-    setProductProperties(prev => ({
-      ...prev,
-      [propName]: value
-    }));
-  }, []);
-
-  const addPropertiesToFill = useCallback((properties) => {
-    if (typeof properties === 'object' && properties !== null) {
-      // If it's an object, merge with existing properties
-      setProductProperties(prev => ({
-        ...prev,
-        ...properties
-      }));
-    }
+  const handlePropertiesChange = useCallback((properties) => {
+    setProductProperties(properties);
   }, []);
 
   // Show loading spinner while categories are loading
@@ -77,25 +63,37 @@ export default function ProductForm({
   const isDisabled = saving;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <BasicFields
-        title={title}
-        setTitle={setTitle}
-        description={description}
-        setDescription={setDescription}
-        price={price}
-        setPrice={setPrice}
-        disabled={isDisabled}
-      />
+    <form onSubmit={handleSubmit} className="space-y-8">
+      {/* Basic Product Information */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Basic Information</h2>
+        <div className="space-y-6">
+          <BasicFields
+            title={title}
+            setTitle={setTitle}
+            description={description}
+            setDescription={setDescription}
+            price={price}
+            setPrice={setPrice}
+            disabled={isDisabled}
+          />
+        </div>
+      </div>
 
-      <ImageUploader
-        images={images}
-        setImages={setImages}
-        disabled={isDisabled}
-        productId={id}
-      />
+      {/* Product Images */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Product Images</h2>
+        <ImageUploader
+          images={images}
+          setImages={setImages}
+          disabled={isDisabled}
+          productId={id}
+        />
+      </div>
       
-      <div>
+      {/* Category Selection */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Category</h2>
         <SelectTwoLists 
           list={categories} 
           onElementSelected={handleCategoryChange} 
@@ -104,23 +102,37 @@ export default function ProductForm({
         />
       </div>
 
-      <AddProperties onUpdateProperties={addPropertiesToFill} />
-
-      <CategoryProperties
-        categories={categories}
-        categoryId={categoryId}
-        productProperties={productProperties}
-        setProductProp={setProductProp}
-        disabled={isDisabled}
-      />
+      {/* Product Variants */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <ProductVariants
+          categories={categories}
+          categoryId={categoryId}
+          initialProperties={productProperties}
+          onPropertiesChange={handlePropertiesChange}
+          disabled={isDisabled}
+        />
+      </div>
       
-      <button
-        type="submit"
-        className="btn-primary"
-        disabled={isDisabled}
-      >
-        {saving ? 'Saving...' : id ? 'Update Product' : 'Create Product'}
-      </button>
+      {/* Submit Button */}
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+          disabled={isDisabled}
+        >
+          {saving ? (
+            <>
+              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Saving...
+            </>
+          ) : (
+            id ? 'Update Product' : 'Create Product'
+          )}
+        </button>
+      </div>
     </form>
   );
 }
