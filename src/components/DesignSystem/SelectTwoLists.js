@@ -11,7 +11,19 @@ export default function SelectTwoLists({
     const [isOpen, setIsOpen] = useState(false);
     const [selectedParent, setSelectedParent] = useState(null);
     const [selectedElement, setSelectedElement] = useState({});
+    const [isMobile, setIsMobile] = useState(false);
     const dropdownRef = useRef(null);
+    
+    // Check if we're on mobile
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 768);
+        };
+        
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
     
     // Memoize parents list to avoid recalculation on every render
     const parents = useMemo(() => {
@@ -22,10 +34,8 @@ export default function SelectTwoLists({
     const children = useMemo(() => {
         if (!selectedParent) return [];
         return list.filter(element => element?.parent?.id === selectedParent.id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [list, selectedParent?.id]);
 
-    
     // Initialize data only when dependencies actually change
     const initializeData = useCallback(() => {
         if (!initialElementId || !list.length) return;
@@ -35,7 +45,7 @@ export default function SelectTwoLists({
         
         setSelectedElement(initialElement);
         setSelectedParent(initialElement.parent);
-    }, [initialElementId, list]); // Remove selectedElement from dependencies
+    }, [initialElementId, list]);
     
     // Initialize data when component mounts or dependencies change
     useEffect(() => {
@@ -64,11 +74,9 @@ export default function SelectTwoLists({
 
     // Batch state updates in select handler
     const handleSelectChild = useCallback((child) => {
-        // Batch state updates to avoid multiple re-renders
         setSelectedElement(child);
         onElementSelected(child.id);
         setIsOpen(false);
-        // Don't clear parents/children here as they're computed
     }, [onElementSelected]);
 
     // Optimize remove selection handler
@@ -90,10 +98,8 @@ export default function SelectTwoLists({
         setIsOpen(true);
         // Pre-select first parent if none selected and parents exist
         if (parents.length > 0) {
-            console.log('selected parent', selectedParent)
             if (selectedParent) {
-                const index = parents.findIndex(c => c.id === selectedParent.id)
-                console.log('index', index)
+                const index = parents.findIndex(c => c.id === selectedParent.id);
                 setSelectedParent(parents[index]);
             } else {
                 setSelectedParent(parents[0]);
@@ -106,7 +112,7 @@ export default function SelectTwoLists({
         setSelectedParent(null);
     }, []);
 
-    // Memoize conditional values to avoid recalculation
+    // Memoized conditional values to avoid recalculation
     const hasSelectedElement = selectedElement && Object.keys(selectedElement).length > 0;
     const selectedElementName = hasSelectedElement ? selectedElement.name : '';
     const selectedParentName = selectedParent ? selectedParent.name : '';
@@ -163,9 +169,19 @@ export default function SelectTwoLists({
                 )}
             </div>
 
-            {/* Large Dropdown Menu */}
+            {/* Mobile overlay */}
+            {isOpen && isMobile && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={closeDropdown} />
+            )}
+
+            {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute z-50 w-full bg-white top-0 rounded-b-md shadow-lg">
+                <div className={`
+                    ${isMobile 
+                        ? 'fixed inset-4 top-16 z-50 bg-white rounded-lg shadow-xl' 
+                        : 'absolute z-50 w-full bg-white top-0 rounded-b-md shadow-lg'
+                    }
+                `}>
                     {/* Header with close button */}
                     <div className="relative h-12 border-b border-gray-100">
                         <div className="text-sm font-medium text-gray-500 px-4 py-3">
@@ -180,22 +196,36 @@ export default function SelectTwoLists({
                         </button>
                     </div>
 
-                     {/* Two Lists Container */}
-                    <div className="flex h-96">
+                    {/* Two Lists Container */}
+                    <div className={`
+                        ${isMobile 
+                            ? 'flex flex-col h-full' 
+                            : 'flex h-96'
+                        }
+                    `}>
                         {/* Left List - Parent list */}
-                        <div className="w-[40%] border-r border-gray-100 p-4">
+                        <div className={`
+                            ${isMobile 
+                                ? 'border-b border-gray-100 p-4 flex-1' 
+                                : 'w-[40%] border-r border-gray-100 p-4'
+                            }
+                        `}>
                             <div className="text-sm font-medium text-gray-500 mb-5">
-                                List
+                                Categories
                             </div>
 
                             {/* Parent Categories */}
-                            <div className="space-y-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-300">
+                            <div className={`
+                                space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-300
+                                ${isMobile ? 'max-h-48' : 'max-h-80'}
+                            `}>
                                 {parents.map((parent) => {
                                     const isHovered = selectedParent?.id === parent.id;
                                     return (
                                         <div
                                             key={parent.id}
-                                            onMouseEnter={() => handleParentHover(parent)}
+                                            onMouseEnter={() => !isMobile && handleParentHover(parent)}
+                                            onClick={() => isMobile && handleParentHover(parent)}
                                             className={`
                                                 flex items-center p-3 rounded cursor-pointer transition-all duration-150
                                                 ${isHovered ? 'bg-gray-100 opacity-100' : 'bg-gray-50 hover:bg-gray-100'}
@@ -219,9 +249,14 @@ export default function SelectTwoLists({
                         </div>
 
                         {/* Right List - Child list */}
-                        <div className="w-[60%] p-4">
+                        <div className={`
+                            ${isMobile 
+                                ? 'p-4 flex-1' 
+                                : 'w-[60%] p-4'
+                            }
+                        `}>
                             <div className="text-sm font-medium text-gray-500 mb-5 flex items-center">
-                                SubList
+                                Subcategories
                                 {selectedParentName && (
                                     <span className="text-xs text-gray-400 ml-2">
                                         ({selectedParentName})
@@ -229,7 +264,10 @@ export default function SelectTwoLists({
                                 )}
                             </div>
                             
-                            <div className="space-y-1 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-violet-400 scrollbar-track-gray-100 hover:scrollbar-thumb-violet-500">
+                            <div className={`
+                                space-y-1 overflow-y-auto scrollbar-thin scrollbar-thumb-violet-400 scrollbar-track-gray-100 hover:scrollbar-thumb-violet-500
+                                ${isMobile ? 'max-h-48' : 'max-h-80'}
+                            `}>
                                 {children.length > 0 ? (
                                     children.map((child) => {
                                         const isSelected = selectedElement.id === child.id;
@@ -261,7 +299,7 @@ export default function SelectTwoLists({
                                     })
                                 ) : (
                                     <div className="text-gray-400 text-sm italic py-8 text-center">
-                                        {selectedParent ? 'No sublist available' : `Select a ${label} type`}
+                                        {selectedParent ? 'No subcategories available' : `Select a category first`}
                                     </div>
                                 )}
                             </div>

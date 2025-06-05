@@ -24,7 +24,7 @@ export default function Categories() {
 
   function onEditCategories() {
     fetchCategories();
-    setRefresh(prev => prev + 1); // Trigger refresh in CategoriesList
+    setRefresh(prev => prev + 1);
     setEditedCategory(null);
   }
 
@@ -34,24 +34,40 @@ export default function Categories() {
 
   return (
     <MainLayout>
-      <h1>Categories</h1>
-      <label>
-        {editedCategory
-          ? `Edit category ${editedCategory.name}`
-          : 'Create new category'}
-      </label>
-      <EditCategory 
-        categories={categories} 
-        editedCategory={editedCategory} 
-        setEditedCategory={setEditedCategory}
-        onEditCategories={onEditCategories}  
-      />
-      {!editedCategory && (
-        <CategoriesList
-          onEditCategory={editCategory}
-          refresh={refresh}
-        />
-      )}
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Categories</h1>
+        </div>
+
+        {/* Category Form */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">
+            {editedCategory
+              ? `Edit category "${editedCategory.name}"`
+              : 'Create new category'}
+          </h2>
+          <EditCategory 
+            categories={categories} 
+            editedCategory={editedCategory} 
+            setEditedCategory={setEditedCategory}
+            onEditCategories={onEditCategories}  
+          />
+        </div>
+
+        {/* Categories List */}
+        {!editedCategory && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-medium text-gray-900">Categories List</h2>
+            </div>
+            <CategoriesList
+              onEditCategory={editCategory}
+              refresh={refresh}
+            />
+          </div>
+        )}
+      </div>
     </MainLayout>
   );
 }

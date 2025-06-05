@@ -9,7 +9,7 @@ export default function ImageUploader({ images, setImages, disabled }) {
   const toast = useToast();
 
   const uploadImages = useCallback(async (ev) => {
-    ev.preventDefault(); // Prevent any form submission
+    ev.preventDefault();
     
     const files = ev.target?.files;
     if (!files?.length) return;
@@ -28,7 +28,7 @@ export default function ImageUploader({ images, setImages, disabled }) {
     });
     
     if (!validFiles.length) {
-      ev.target.value = ''; // Clear the input
+      ev.target.value = '';
       return;
     }
     
@@ -37,7 +37,6 @@ export default function ImageUploader({ images, setImages, disabled }) {
     try {
       const res = await FilesService.uploadFile(validFiles);
       
-      // Use functional update to prevent stale closure issues
       setImages(prevImages => {
         const newImages = [...prevImages, ...res.links];
         return newImages;
@@ -49,20 +48,19 @@ export default function ImageUploader({ images, setImages, disabled }) {
       toast.error('Error', 'Failed to upload images');
     } finally {
       setIsUploading(false);
-      ev.target.value = ''; // Clear the input regardless of success/failure
+      ev.target.value = '';
     }
   }, [toast, setImages]);
 
   const deleteImage = useCallback(async (ev, link) => {
-    ev.preventDefault(); // Prevent any default behavior
-    ev.stopPropagation(); // Stop event bubbling
+    ev.preventDefault();
+    ev.stopPropagation();
     
     if (disabled || isUploading) return;
     
     try {
       await FilesService.deleteFile(link);  
       
-      // Use functional update to prevent stale closure issues
       setImages(prevImages => {
         const filteredImages = prevImages.filter(imgLink => imgLink !== link);
         return filteredImages;
@@ -76,10 +74,8 @@ export default function ImageUploader({ images, setImages, disabled }) {
   }, [toast, setImages, disabled, isUploading]);
 
   const updateImagesOrder = useCallback((newList) => {
-    // Only update if the order actually changed
     const newOrder = newList.map(item => item.content);
     setImages(prevImages => {
-      // Check if order actually changed to prevent unnecessary updates
       if (JSON.stringify(prevImages) !== JSON.stringify(newOrder)) {
         return newOrder;
       }
@@ -92,31 +88,33 @@ export default function ImageUploader({ images, setImages, disabled }) {
       <label className="block text-sm font-medium text-gray-700 mb-2">
         Photos
       </label>
-      <div className="mb-2 flex flex-wrap gap-1">
+      
+      {/* Image grid */}
+      <div className="mb-2">
         <ReactSortable
           list={images.map(link => ({ id: link, content: link }))}
           setList={updateImagesOrder}
-          className="flex flex-wrap gap-1"
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3"
           disabled={disabled || isUploading}
           animation={150}
           delayOnTouchStart={true}
           delay={2}
         >
           {images?.length && images.map(link => (
-            <div key={link} className="relative h-40 bg-white p-4 shadow-sm rounded-sm border border-gray-200">
+            <div key={link} className="relative aspect-square bg-white p-2 sm:p-3 shadow-sm rounded-sm border border-gray-200 group">
               <img 
                 src={link} 
                 alt="" 
                 className="rounded-lg h-full w-full object-cover" 
                 loading="lazy"
-                draggable={false} // Prevent image drag interfering with sortable
+                draggable={false}
               />
               <button
                 type="button"
                 onClick={(ev) => deleteImage(ev, link)}
-                className="absolute top-1 right-1 bg-gray-300 text-gray-700 rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-gray-400 cursor-pointer transition-colors duration-200"
+                className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600 cursor-pointer transition-colors duration-200 opacity-0 group-hover:opacity-100 sm:opacity-100"
                 disabled={disabled || isUploading}
-                aria-label={`Delete image ${link}`}
+                aria-label={`Delete image`}
               >
                 &times;
               </button>
@@ -124,27 +122,31 @@ export default function ImageUploader({ images, setImages, disabled }) {
           ))}
         </ReactSortable>
         
-        {isUploading && (
-          <div className="h-40 flex items-center">
-            <Spinner />
-          </div>
-        )}
+        {/* Upload button and loading spinner container */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 sm:gap-3 mt-2">
+          {isUploading && (
+            <div className="aspect-square flex items-center justify-center bg-gray-50 rounded-sm border border-gray-200">
+              <Spinner />
+            </div>
+          )}
 
-        <label className="w-40 h-40 cursor-pointer text-center flex flex-col items-center justify-center text-sm gap-1 text-[#5542F6] rounded-sm bg-white shadow-sm border border-[#5542F6] hover:bg-gray-50 transition-colors duration-200">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-          </svg>
-          <div>Add image</div>
-          <input 
-            type="file" 
-            onChange={uploadImages} 
-            className="hidden" 
-            multiple
-            accept="image/*"
-            disabled={disabled || isUploading}
-          />
-        </label>
+          <label className="aspect-square cursor-pointer text-center flex flex-col items-center justify-center text-sm gap-1 text-[#5542F6] rounded-sm bg-white shadow-sm border border-[#5542F6] hover:bg-gray-50 transition-colors duration-200 p-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 sm:w-8 sm:h-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            <div className="text-xs sm:text-sm font-medium">Add image</div>
+            <input 
+              type="file" 
+              onChange={uploadImages} 
+              className="hidden" 
+              multiple
+              accept="image/*"
+              disabled={disabled || isUploading}
+            />
+          </label>
+        </div>
       </div>
+      
       {images.length > 0 && (
         <p className="text-sm text-gray-500 mt-2">
           Drag images to reorder them
