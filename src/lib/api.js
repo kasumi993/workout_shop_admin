@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+import { getSession, signOut } from 'next-auth/react';
 
 // Create a custom axios instance for the NestJS backend
 const api = axios.create({
@@ -32,8 +32,7 @@ api.interceptors.response.use(
     if (typeof window !== 'undefined') {
       // Handle 401 Unauthorized errors
       if (error.response && error.response.status === 401) {
-        // Redirect to login page - NextAuth will handle the session expiry
-        window.location.href = '/login';
+        signOut({ callbackUrl: '/login' });
       }
       
       // Handle 403 Forbidden errors (authenticated but not authorized)

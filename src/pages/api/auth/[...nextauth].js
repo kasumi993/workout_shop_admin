@@ -1,7 +1,7 @@
 import NextAuth from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import axios from 'axios';
+import api from '@/lib/api';
 
 // Configure the API URL
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
@@ -28,7 +28,7 @@ export const authOptions = {
       async authorize(credentials) {
         try {
           // Make a call to the NestJS backend for authentication
-          const response = await axios.post(`${API_URL}/auth/login`, {
+          const response = await api.post(`${API_URL}/auth/login`, {
             email: credentials.email,
             password: credentials.password
           });
@@ -62,7 +62,7 @@ export const authOptions = {
         // For Google sign-in, verify with backend
         if (account.provider === 'google') {
           try {
-            const response = await axios.post(`${API_URL}/auth/google`, {
+            const response = await api.post(`${API_URL}/auth/google`, {
               email: profile.email,
               name: profile.name,
               image: profile.picture,

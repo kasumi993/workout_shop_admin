@@ -61,7 +61,7 @@ export default function ProductForm({
   const isDisabled = saving;
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl ">
       <form onSubmit={handleSubmit} className="space-y-6 lg:space-y-8">
         {/* Basic Product Information */}
         <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 responsive-card">

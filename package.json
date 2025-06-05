@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.772.0",
     "@formkit/drag-and-drop": "^0.5.3",
     "axios": "^1.8.3",
     "mime-types": "^2.1.35",
