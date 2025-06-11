@@ -79,13 +79,6 @@ export default function Home() {
     });
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount);
-  };
-
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -247,7 +240,7 @@ export default function Home() {
                           {product.title}
                         </p>
                         <p className="text-sm text-gray-500">
-                          {product.price && formatCurrency(product.price)}
+                          {product.price && product.price}
                         </p>
                       </div>
                       <div className="text-sm text-gray-400">
