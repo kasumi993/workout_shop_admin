@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@formkit/drag-and-drop": "^0.5.3",
+    "@sentry/nextjs": "^9.29.0",
     "axios": "^1.8.3",
     "mime-types": "^2.1.35",
     "next": "^15.3.2",
