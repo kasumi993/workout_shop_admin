@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Logo from "@/components/GlobalComponents/Logo";
+import { Analytics } from '@vercel/analytics/next';
 
 // User Avatar Component with Placeholder
 const UserAvatar = ({ user, size = "md" }) => {
@@ -144,6 +145,8 @@ export default function MainLayout({ children }) {
           <main className="flex-1 p-4 lg:p-6">
             <div className="max-w-7xl mx-auto">
               {children}
+              {/* Analytics Component */}
+              <Analytics />
             </div>
           </main>
         </div>
