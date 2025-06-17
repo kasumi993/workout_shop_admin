@@ -3,7 +3,10 @@ import api from '@/lib/api';
 /**
  * Creates a new product
  */
-const createProduct = async (productData) => {
+/**
+ * Creates a new product
+ */
+export const createProduct = async (productData) => {
     try {
         const response = await api.post('/products', productData);
         
@@ -14,4 +17,4 @@ const createProduct = async (productData) => {
     }
 };
 
-export default createProduct;
+

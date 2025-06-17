@@ -3,7 +3,7 @@ import api from '@/lib/api';
 /**
  * Updates a product
  */
-const updateProduct = async (id, productData) => {
+export const updateProduct = async (id, productData) => {
     try {
         const response = await api.patch(`/products/${id}`, productData);
         return response.data;
@@ -12,5 +12,3 @@ const updateProduct = async (id, productData) => {
         throw error;
     }
 };
-
-export default updateProduct;

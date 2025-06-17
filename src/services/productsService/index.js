@@ -1,7 +1,7 @@
-import deleteProduct from './delete';
+import { deleteProduct } from './delete';
 import { getProducts, getProductById } from './get';
-import createProduct from './create';
-import updateProduct from './update';
+import { createProduct } from './create';
+import { updateProduct } from './update';
 
 const services = {
     getProducts,

@@ -33,7 +33,7 @@ export default function Home() {
         api.get('/orders')
       ]);
 
-      const products = productsRes.data;
+      const products = productsRes.data.products;
       const categories = categoriesRes.data;
       const orders = ordersRes.data;
 

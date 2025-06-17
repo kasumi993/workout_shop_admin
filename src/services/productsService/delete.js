@@ -21,4 +21,3 @@ export const deleteProduct = async (productId) => {
     }
 };
 
-export default deleteProduct;

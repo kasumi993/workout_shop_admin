@@ -1,11 +1,23 @@
 import api from '@/lib/api';
 
 /**
- * Fetches products from the backend
+ * Fetches products from the backend with pagination and search support
  */
-export const getProducts = async () => {
+export const getProducts = async (params = {}) => {
     try {
-        const response = await api.get(`/products`);
+        // Build query string from parameters
+        const searchParams = new URLSearchParams();
+        
+        Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                searchParams.append(key, value.toString());
+            }
+        });
+        
+        const queryString = searchParams.toString();
+        const url = queryString ? `/products?${queryString}` : '/products';
+        
+        const response = await api.get(url);
         return response.data;
     } catch (error) {
         console.error('Error fetching products:', error);
@@ -28,3 +40,4 @@ export const getProductById = async (id) => {
         throw error;
     }
 };
+

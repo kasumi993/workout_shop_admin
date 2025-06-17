@@ -73,6 +73,9 @@ export default function OrdersPage() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Products
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Total
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -102,18 +105,27 @@ export default function OrdersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">
-                        {order.line_items.map((item, index) => (
-                          <div key={index} className="mb-1">
-                            {item.price_data?.product_data.name} × {item.quantity}
-                          </div>
-                        ))}
+                        {order.items && order.items.length > 0 ? (
+                          order.items.map((item, index) => (
+                            <div key={index} className="mb-1">
+                              {item.product?.title || 'Product'} × {item.quantity}
+                            </div>
+                          ))
+                        ) : (
+                          <span className="text-gray-500">No items</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {order.total ? `${parseFloat(order.total).toLocaleString()} Fr CFA` : 'N/A'}
                       </div>
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
                     No orders found
                   </td>
                 </tr>
@@ -131,19 +143,24 @@ export default function OrdersPage() {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="text-sm font-medium text-gray-900">
-                      Order #{order.id}
+                      Order #{order.id.slice(-8)}
                     </div>
                     <div className="text-sm text-gray-500">
                       {formatDate(order.createdAt)}
                     </div>
                   </div>
-                  <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
-                    order.paid 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {order.paid ? 'PAID' : 'UNPAID'}
-                  </span>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                      order.paid 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {order.paid ? 'PAID' : 'UNPAID'}
+                    </span>
+                    <div className="text-sm font-medium text-gray-900">
+                      {order.total ? `${parseFloat(order.total).toLocaleString()} Fr CFA` : 'N/A'}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Customer info */}
@@ -161,16 +178,20 @@ export default function OrdersPage() {
                 <div className="border-t border-gray-200 pt-4">
                   <h4 className="text-sm font-medium text-gray-700 mb-2">Products</h4>
                   <div className="space-y-2">
-                    {order.line_items.map((item, index) => (
-                      <div key={index} className="flex justify-between text-sm">
-                        <span className="text-gray-900">
-                          {item.price_data?.product_data.name}
-                        </span>
-                        <span className="text-gray-600">
-                          × {item.quantity}
-                        </span>
-                      </div>
-                    ))}
+                    {order.items && order.items.length > 0 ? (
+                      order.items.map((item, index) => (
+                        <div key={index} className="flex justify-between text-sm">
+                          <span className="text-gray-900">
+                            {item.product?.title || 'Product'}
+                          </span>
+                          <span className="text-gray-600">
+                            × {item.quantity}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <span className="text-gray-500 text-sm">No items</span>
+                    )}
                   </div>
                 </div>
               </div>
