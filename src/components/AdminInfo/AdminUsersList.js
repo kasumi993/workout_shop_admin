@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import Swal from 'sweetalert2';
 import LoadingSpinner from "@/components/GlobalComponents/LoadingSpinner";
 
@@ -22,9 +23,11 @@ const UserAvatar = ({ user, size = "md" }) => {
 
   if (user?.image) {
     return (
-      <img 
-        src={user.image} 
-        alt={user.name || "User avatar"} 
+      <Image
+        src={user.image}
+        alt={user.name || "User avatar"}
+        width={size === 'sm' ? 32 : size === 'md' ? 40 : 48}
+        height={size === 'sm' ? 32 : size === 'md' ? 40 : 48}
         className={`${sizeClasses[size]} rounded-full object-cover`}
       />
     );

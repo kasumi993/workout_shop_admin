@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Swal from 'sweetalert2';
 import CategoryItem from "./CategoryItem";
 import { useToast } from "@/components/GlobalComponents/Notifications";
@@ -12,9 +12,9 @@ export default function CategoriesList({ onEditCategory, onDeleteCategory, refre
     
     useEffect(() => {
         fetchCategories();
-    }, [refresh]);
+    }, [refresh, fetchCategories]);
     
-    async function fetchCategories() {
+    const fetchCategories = useCallback(async () => {
         try {
             setLoading(true);
             const response = await CategoriesService.getCategories();
@@ -25,7 +25,7 @@ export default function CategoriesList({ onEditCategory, onDeleteCategory, refre
         } finally {
             setLoading(false);
         }
-    }
+    }, [toast]);
 
     function editCategory(category) {
         onEditCategory(category);

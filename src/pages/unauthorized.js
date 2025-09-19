@@ -20,7 +20,7 @@ export default function UnauthorizedPage() {
 
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
           <p className="text-gray-600 mb-6">
-            You don't have permission to access this admin panel. Admin privileges are required.
+            You don&apos;t have permission to access this admin panel. Admin privileges are required.
           </p>
 
           <button

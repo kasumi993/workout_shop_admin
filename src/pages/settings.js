@@ -1,5 +1,6 @@
 import MainLayout from "@/layouts/MainLayout";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { useAuth } from "@/pages/_app";
 import AdminUsersList from "@/components/AdminInfo/AdminUsersList";
 import CreateEditAdminUser from "@/components/AdminInfo/CreateEditAdminUser";
@@ -27,9 +28,9 @@ export default function SettingsPage() {
     } else if (activeTab === 'customers') {
       fetchCustomers();
     }
-  }, [activeTab, refresh]);
+  }, [activeTab, refresh, fetchAdminUsers, fetchCustomers]);
 
-  const fetchAdminUsers = async () => {
+  const fetchAdminUsers = useCallback(async () => {
     try {
       setLoading(true);
       const customers = await CustomersService.getCustomers();
@@ -42,9 +43,9 @@ export default function SettingsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       setCustomersLoading(true);
       const allCustomers = await CustomersService.getCustomers();
@@ -57,7 +58,7 @@ export default function SettingsPage() {
     } finally {
       setCustomersLoading(false);
     }
-  };
+  }, [toast]);
 
   const handleCreateUser = () => {
     setEditingUser(null);
@@ -294,7 +295,7 @@ export default function SettingsPage() {
                                     <div className="flex items-center">
                                       <div className="flex-shrink-0 h-10 w-10">
                                         {customer.image ? (
-                                          <img className="h-10 w-10 rounded-full object-cover" src={customer.image} alt={customer.name} />
+                                          <Image className="h-10 w-10 rounded-full object-cover" src={customer.image} alt={customer.name} width={40} height={40} />
                                         ) : (
                                           <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
                                             <span className="text-sm font-medium text-indigo-600">
