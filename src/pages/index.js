@@ -1,12 +1,12 @@
 import MainLayout from "@/layouts/MainLayout";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/pages/_app";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import api from "@/lib/api";
 import { useToast } from "@/components/GlobalComponents/Notifications";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { user, session } = useAuth();
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalCategories: 0,

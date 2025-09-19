@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { signOut } from "next-auth/react";
+import { useAuth } from "@/pages/_app";
 import Image from "next/image";
 import Logo from "@/components/GlobalComponents/Logo";
 
@@ -11,10 +11,11 @@ export default function Sidebar({ show, onHide }) {
   const activeIcon = inactiveIcon + ' text-[#5542F6]';
   const router = useRouter();
   const { pathname } = router;
-  
+  const { signOut } = useAuth();
+
   async function handleLogout() {
-    await router.push('/');
-    await signOut({ callbackUrl: '/login' });
+    await signOut();
+    await router.push('/login');
   }
   
   const navItems = [

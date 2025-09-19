@@ -2,34 +2,79 @@ import LoadingSpinner from "@/components/GlobalComponents/LoadingSpinner";
 import { ToastProvider } from "@/components/GlobalComponents/Notifications";
 import Unauthorized from "@/components/GlobalComponents/Unauthorized";
 import "@/styles/globals.scss";
-import { SessionProvider, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState, createContext, useContext } from "react";
 
-import { useEffect } from "react";
+// Create auth context
+const AuthContext = createContext(null);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const supabase = createClient();
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  useEffect(() => {
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
+    };
+
+    getInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [supabase]);
+
+  return (
+    <AuthContext.Provider value={{ user, loading, supabase, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
 
 function Auth({ children }) {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
 
-  const publicRoutes = ['/login', '/debug'];
+  const publicRoutes = ['/login', '/reset-password', '/auth/callback', '/auth/reset-password-confirm', '/unauthorized'];
   const requiresAuth = !publicRoutes.includes(router.pathname);
 
   useEffect(() => {
-    console.log('Auth effect triggered:', { status, requiresAuth, session });
-    if (status === 'unauthenticated' && requiresAuth) {
+    if (!loading && !user && requiresAuth) {
       router.push('/login');
     }
-  }, [status, requiresAuth, router]);
+  }, [loading, user, requiresAuth, router]);
 
-  if (status === 'loading') {
+  if (loading) {
     return <LoadingSpinner />;
   }
 
-  if (requiresAuth && status === 'unauthenticated') {
+  if (requiresAuth && !user) {
     return <LoadingSpinner />;
   }
 
-  if (requiresAuth && session && !session.user.isAdmin) {
+  if (requiresAuth && user && !user.user_metadata?.isAdmin) {
     return <Unauthorized />;
   }
 
@@ -37,25 +82,14 @@ function Auth({ children }) {
 }
 
 
-export default function App({ Component, pageProps: { session, ...pageProps } }) {
+export default function App({ Component, pageProps }) {
   return (
-    <SessionProvider session={session}>
+    <AuthProvider>
       <Auth>
         <ToastProvider>
           <Component {...pageProps} />
         </ToastProvider>
       </Auth>
-    </SessionProvider>
+    </AuthProvider>
   );
-}
-
-
-export async function getServerSideProps(context) {
-  const session = await getSession(context);
-
-  return {
-    props: {
-      session,
-    },
-  };
 }

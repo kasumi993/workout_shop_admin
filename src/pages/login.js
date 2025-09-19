@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import { createClient } from "@/lib/supabase/client";
 import Logo from "@/components/GlobalComponents/Logo";
 import LoadingSpinner from "@/components/GlobalComponents/LoadingSpinner";
 
@@ -9,46 +9,92 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { data: session, status } = useSession();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  
-  // If already authenticated, redirect to dashboard
+  const supabase = createClient();
+
+  // Check authentication status
   useEffect(() => {
-    if (status === 'authenticated' && session?.user?.isAdmin) {
-      router.push('/');
-    }
-  }, [session, status, router]);
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+
+        if (user && user.user_metadata?.isAdmin) {
+          router.push('/');
+        }
+      } catch (error) {
+        console.error('Error checking auth status:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user?.user_metadata?.isAdmin) {
+          router.push('/');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [supabase, router]);
   
   const handleCredentialsLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
-    
+
     try {
-      const result = await signIn('credentials', {
-        redirect: false,
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
-      if (result?.error) {
-        setError('Login failed. Please check your credentials.');
-      } else {
-        router.push('/');
+
+      if (error) {
+        setError(error.message);
+        return;
       }
+
+      // Check if user is admin
+      if (!data.user.user_metadata?.isAdmin) {
+        setError('Access denied. Admin privileges required.');
+        await supabase.auth.signOut();
+        return;
+      }
+
+      router.push('/');
     } catch (err) {
-      console.error(err);
+      console.error('Login error:', err);
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const handleGoogleLogin = async () => {
-    await signIn('google', { callbackUrl: '/' });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        setError('Google login failed. Please try again.');
+      }
+    } catch (err) {
+      console.error('Google login error:', err);
+      setError('Google login failed. Please try again.');
+    }
   };
   
-  if (status === 'loading') {
+  if (loading) {
     return <LoadingSpinner />;
   }
   
@@ -115,6 +161,16 @@ export default function LoginPage() {
               />
             </div>
             
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => router.push('/reset-password')}
+                className="text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+              >
+                Forgot password?
+              </button>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}

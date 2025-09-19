@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/pages/_app";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import Logo from "@/components/GlobalComponents/Logo";
 import { Analytics } from '@vercel/analytics/next';
@@ -12,7 +12,9 @@ const UserAvatar = ({ user, size = "md" }) => {
     lg: "w-12 h-12 text-base"
   };
 
-  const getInitials = (name) => {
+  const getInitials = (user) => {
+    if (!user) return "AD";
+    const name = user?.user_metadata?.full_name || user?.email;
     if (!name) return "AD";
     return name
       .split(' ')
@@ -22,11 +24,11 @@ const UserAvatar = ({ user, size = "md" }) => {
       .toUpperCase();
   };
 
-  if (user?.image) {
+  if (user?.user_metadata?.avatar_url) {
     return (
-      <img 
-        src={user.image} 
-        alt={user.name || "User avatar"} 
+      <img
+        src={user.user_metadata.avatar_url}
+        alt={user?.user_metadata?.full_name || user?.email || "User avatar"}
         className={`${sizeClasses[size]} rounded-full object-cover ring-2 ring-white ring-opacity-75 shadow-sm`}
       />
     );
@@ -34,14 +36,14 @@ const UserAvatar = ({ user, size = "md" }) => {
 
   return (
     <div className={`${sizeClasses[size]} rounded-full bg-gradient-to-br from-indigo-300 to-purple-500 flex items-center justify-center text-white font-semibold shadow-sm ring-2 ring-white ring-opacity-75`}>
-      {getInitials(user?.name)}
+      {getInitials(user)}
     </div>
   );
 };
 
 export default function MainLayout({ children }) {
   const [showNav, setShowNav] = useState(false);
-  const { data: session } = useSession();
+  const { user, session } = useAuth();
   
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -63,7 +65,7 @@ export default function MainLayout({ children }) {
           </div>
           
           <div className="flex items-center space-x-3">
-            <UserAvatar user={session?.user} size="sm" />
+            <UserAvatar user={user} size="sm" />
           </div>
         </div>
       </div>
@@ -78,7 +80,7 @@ export default function MainLayout({ children }) {
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <h1 className="text-2xl font-semibold text-gray-900">
-                    Welcome back, <span className="text-indigo-600">{session?.user?.name}</span>
+                    Welcome back, <span className="text-indigo-600">{user?.user_metadata?.full_name || user?.email}</span>
                   </h1>
                   <p className="text-gray-600 mt-1">
                     Manage your store from this admin dashboard
@@ -96,13 +98,13 @@ export default function MainLayout({ children }) {
                   
                   {/* User Profile */}
                   <div className="flex items-center space-x-3 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
-                    <UserAvatar user={session?.user} size="md" />
+                    <UserAvatar user={user} size="md" />
                     <div className="hidden xl:block text-left">
                       <p className="text-sm font-medium text-gray-900 truncate max-w-[120px]">
-                        {session?.user?.name}
+                        {user?.user_metadata?.full_name || user?.email}
                       </p>
                       <p className="text-xs text-gray-500 truncate max-w-[120px]">
-                        {session?.user?.email}
+                        {user?.email}
                       </p>
                     </div>
                     <div className="flex items-center">
@@ -119,18 +121,18 @@ export default function MainLayout({ children }) {
           {/* Mobile user info card */}
           <div className="block lg:hidden bg-white mx-4 mt-4 rounded-lg shadow-sm border border-gray-200 p-4">
             <div className="flex items-center space-x-4">
-              <UserAvatar user={session?.user} size="lg" />
+              <UserAvatar user={user} size="lg" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2">
                   <p className="text-lg font-semibold text-gray-900 truncate">
-                    {session?.user?.name}
+                    {user?.user_metadata?.full_name || user?.email}
                   </p>
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     Admin
                   </span>
                 </div>
                 <p className="text-sm text-gray-600 truncate">
-                  {session?.user?.email}
+                  {user?.email}
                 </p>
               </div>
               <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200">

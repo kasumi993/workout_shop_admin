@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getSession, signOut } from 'next-auth/react';
+import { createClient } from '@/lib/supabase/client';
 
 // Create a custom axios instance for the NestJS backend
 const api = axios.create({
@@ -14,9 +14,10 @@ api.interceptors.request.use(
   async (config) => {
     // Check if we're in a browser environment
     if (typeof window !== 'undefined') {
-      const session = await getSession();
-      if (session?.accessToken) {
-        config.headers.Authorization = `Bearer ${session.accessToken}`;
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        config.headers.Authorization = `Bearer ${session.access_token}`;
       }
     }
     return config;
@@ -27,20 +28,22 @@ api.interceptors.request.use(
 // Add a response interceptor to handle common errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     // If we're in a browser environment
     if (typeof window !== 'undefined') {
       // Handle 401 Unauthorized errors
       if (error.response && error.response.status === 401) {
-        signOut({ callbackUrl: '/login' });
+        const supabase = createClient();
+        await supabase.auth.signOut();
+        window.location.href = '/login';
       }
-      
+
       // Handle 403 Forbidden errors (authenticated but not authorized)
       else if (error.response && error.response.status === 403) {
         console.error('Access forbidden:', error.response.data);
       }
     }
-    
+
     return Promise.reject(error);
   }
 );

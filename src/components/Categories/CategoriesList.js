@@ -44,7 +44,6 @@ export default function CategoriesList({ onEditCategory, onDeleteCategory, refre
         
         if (result.isConfirmed) {
             try {
-                console.log('Deleting category:', category);
                 await CategoriesService.deleteCategory(category.id);
                 toast.success('Success', 'Category deleted successfully');
                 fetchCategories();
