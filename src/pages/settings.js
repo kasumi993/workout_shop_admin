@@ -22,15 +22,7 @@ export default function SettingsPage() {
   const { user, session } = useAuth();
   const toast = useToast();
 
-  useEffect(() => {
-    if (activeTab === 'users') {
-      fetchAdminUsers();
-    } else if (activeTab === 'customers') {
-      fetchCustomers();
-    }
-  }, [activeTab, refresh, fetchAdminUsers, fetchCustomers]);
-
-  const fetchAdminUsers = useCallback(async () => {
+   const fetchAdminUsers = useCallback(async () => {
     try {
       setLoading(true);
       const customers = await CustomersService.getCustomers();
@@ -45,7 +37,7 @@ export default function SettingsPage() {
     }
   }, [toast]);
 
-  const fetchCustomers = useCallback(async () => {
+    const fetchCustomers = useCallback(async () => {
     try {
       setCustomersLoading(true);
       const allCustomers = await CustomersService.getCustomers();
@@ -59,6 +51,16 @@ export default function SettingsPage() {
       setCustomersLoading(false);
     }
   }, [toast]);
+
+  useEffect(() => {
+    if (activeTab === 'users') {
+      fetchAdminUsers();
+    } else if (activeTab === 'customers') {
+      fetchCustomers();
+    }
+  }, [activeTab, refresh, fetchAdminUsers, fetchCustomers]);
+
+
 
   const handleCreateUser = () => {
     setEditingUser(null);
